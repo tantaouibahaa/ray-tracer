@@ -13,27 +13,30 @@ writePpmHeader handle width height = do
     hPutStrLn handle "255"
 
 
-hitSphere :: Point3 -> Double -> Ray -> Bool
+hitSphere :: Point3 -> Double -> Ray -> Double
 hitSphere center radius ray =
     let oc = center `vecSub` rayOrigin ray
         a  = dot (rayDirection ray) (rayDirection ray)
         b  = -2.0 * dot (rayDirection ray) oc
         c  = dot oc oc - radius * radius
         discriminant = b * b - 4 * a * c
-    in discriminant >= 0
+    in if discriminant < 0
+          then -1.0
+          else (-b - sqrt discriminant) / (2 * a)
 
 rayColor :: Ray -> Vec3
 rayColor ray =
-    if hitSphere (Vec3 0 0 (-1)) 0.5 ray
-    then Vec3 1 0 0
-    else
-        let unitDirection = unitVector (rayDirection ray)
-            a = 0.5 * (vecY unitDirection + 1.0)
-            white = Vec3 1.0 1.0 1.0
-            blue  = Vec3 0.5 0.7 1.0
-        in vecAdd (vecScale (1.0 - a) white) (vecScale a blue)
-
-
+    let t = hitSphere (Vec3 0 0 (-1)) 0.5 ray
+    in if t > 0.0
+       then
+           let normal = unitVector (rayAt ray t `vecSub` Vec3 0 0 (-1))
+           in vecScale 0.5 (Vec3 (vecX normal + 1) (vecY normal + 1) (vecZ normal + 1))
+       else
+           let unitDirection = unitVector (rayDirection ray)
+               a = 0.5 * (vecY unitDirection + 1.0)
+               white = Vec3 1.0 1.0 1.0
+               blue  = Vec3 0.5 0.7 1.0
+           in vecAdd (vecScale (1.0 - a) white) (vecScale a blue)
 main = do
     let aspectRatio = 16.0 / 9.0 :: Double
         imageWidth  = 400 :: Int
