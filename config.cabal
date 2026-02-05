@@ -1,0 +1,12 @@
+cabal-version: 2.4
+name:          ray-tracer-hs
+version:       0.1.0.0
+synopsis:      Ray tracer in Haskell
+
+executable ray-tracer-hs
+  main-is:       main.hs
+  other-modules: Vec3, Color
+  hs-source-dirs: ., src
+  build-depends: base >= 4.7 && < 5
+  default-language: Haskell2010
+  ghc-options: -O2
