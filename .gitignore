@@ -2,3 +2,4 @@ main.hi
 main.o
 .DS_store
 dist-newstyle/
+image.ppm

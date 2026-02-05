@@ -16,13 +16,13 @@ writePpmHeader handle width height = do
 hitSphere :: Point3 -> Double -> Ray -> Double
 hitSphere center radius ray =
     let oc = center `vecSub` rayOrigin ray
-        a  = dot (rayDirection ray) (rayDirection ray)
-        b  = -2.0 * dot (rayDirection ray) oc
-        c  = dot oc oc - radius * radius
-        discriminant = b * b - 4 * a * c
+        a  = vecLengthSquared (rayDirection ray)
+        h  = dot (rayDirection ray) oc
+        c  = vecLengthSquard oc - radius * radius
+        discriminant = h * h -  a * c
     in if discriminant < 0
           then -1.0
-          else (-b - sqrt discriminant) / (2 * a)
+          else (-h - sqrt discriminant) / a
 
 rayColor :: Ray -> Vec3
 rayColor ray =
