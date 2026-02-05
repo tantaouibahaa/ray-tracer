@@ -1,30 +1,23 @@
 import System.IO
 
-
 main :: IO ()
 main = do
-
-    let width = 256
-    let height = 256
-
-    h <- openFile "image.ppm" WriteMode
-    hPutStrLn h "P3"
-    hPutStrLn h (show width ++ " " ++ show height)
-    hPutStrLn h "255"
-
-
-    sequence_ [ 
-          let r = fromIntegral i / fromIntegral (width -1)
-              g = fromIntegral (height -1 - j) / fromIntegral (height - 1)
-              b = 0.25 :: Double
-              ir = floor (255.999 * r) :: Int
-              ig = floor (255.999 * g) :: Int
-              ib = floor (255.999 * b) :: Int
-          in putStrLn (show ir ++ " " ++ show ig ++ " " ++ show ib)
-            | i <- [0..width-1]
-            , j <- [0..height-1]
+    let imageWidth = 256
+    let imageHeight = 256
+    fileHandle <- openFile "image.ppm" WriteMode
+    hPutStrLn fileHandle "P3"
+    hPutStrLn fileHandle (show imageWidth ++ " " ++ show imageHeight)
+    hPutStrLn fileHandle "255"
+    sequence_
+        [ let red   = fromIntegral col / fromIntegral (imageWidth - 1)
+              green = fromIntegral (imageHeight - 1 - row) / fromIntegral (imageHeight - 1)
+              blue  = 0.25 :: Double
+              scaledRed   = floor (255.999 * red)   :: Int
+              scaledGreen = floor (255.999 * green) :: Int
+              scaledBlue  = floor (255.999 * blue)  :: Int
+           in hPutStrLn fileHandle (show scaledRed ++ " " ++ show scaledGreen ++ " " ++ show scaledBlue)
+        | row <- [0 .. imageHeight - 1]
+        , col <- [0 .. imageWidth - 1]
         ]
-    
-    hPutStr stderr "Done. "
-    putStrLn "Hello, world!"
-
+    hClose fileHandle
+    hPutStrLn stderr "Done."
