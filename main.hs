@@ -2,15 +2,22 @@ import System.IO
 import Color
 import Vec3
 
+
+-- not sure i'll need this in the future, but it's here for now
+writePPMHeader :: Handle -> Int -> Int -> IO()
+writePPMHeader fileHandle imageWidth imageHeight = do
+    hPutStrLn fileHandle "P3"
+    hPutStrLn fileHandle (show imageWidth ++ " " ++ show imageHeight)
+    hPutStrLn fileHandle "255"
+
+
+
 main :: IO ()
 main = do
     let imageWidth = 256
     let imageHeight = 256
     fileHandle <- openFile "image.ppm" WriteMode
-    hPutStrLn fileHandle "P3"
-    hPutStrLn fileHandle (show imageWidth ++ " " ++ show imageHeight)
-    hPutStrLn fileHandle "255"
-
+    writePPMHeader fileHandle imageWidth imageHeight
     mapM_ (\row -> do
         hPutStr stderr ("\rScanlines remaining: " ++ show (imageHeight - row) ++ " ")
         hFlush stderr
