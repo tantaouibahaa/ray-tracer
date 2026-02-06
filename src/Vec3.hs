@@ -44,3 +44,17 @@ vecLengthSquared (Vec3 x y z) = x*x + y*y + z*z
 
 unitVector :: Vec3 -> Vec3
 unitVector v = vecDiv v (vecLength v)
+
+nearZero :: Vec3 -> Bool
+nearZero (Vec3 x y z) = abs x < s && abs y < s && abs z < s
+  where s = 1e-8
+
+reflect :: Vec3 -> Vec3 -> Vec3
+reflect v n = v `vecSub` vecScale (2 * dot v n) n
+
+refract :: Vec3 -> Vec3 -> Double -> Vec3
+refract uv n etaiOverEtat =
+    let cosTheta = min (dot (vecNegate uv) n) 1.0
+        rOutPerp = vecScale etaiOverEtat (uv `vecAdd` vecScale cosTheta n)
+        rOutParallel = vecScale (-(sqrt (abs (1.0 - vecLengthSquared rOutPerp)))) n
+    in rOutPerp `vecAdd` rOutParallel
