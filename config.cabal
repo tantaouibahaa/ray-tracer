@@ -5,8 +5,8 @@ synopsis:      Ray tracer in Haskell
 
 executable ray-tracer-hs
   main-is:       main.hs
-  other-modules: Vec3, Color, Ray
+  other-modules: Vec3, Color, Ray, Interval, Hittable, Sphere, Random, Material, Camera
   hs-source-dirs: ., src
-  build-depends: base >= 4.7 && < 5
+  build-depends: base >= 4.7 && < 5, random
   default-language: Haskell2010
   ghc-options: -O2
