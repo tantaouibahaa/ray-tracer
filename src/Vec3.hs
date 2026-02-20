@@ -58,3 +58,8 @@ refract uv n etaiOverEtat =
         rOutPerp = vecScale etaiOverEtat (uv `vecAdd` vecScale cosTheta n)
         rOutParallel = vecScale (-(sqrt (abs (1.0 - vecLengthSquared rOutPerp)))) n
     in rOutPerp `vecAdd` rOutParallel
+
+vecIndex :: Vec3 -> Int -> Double
+vecIndex (Vec3 x _ _) 0 = x
+vecIndex (Vec3 _ y _) 1 = y
+vecIndex (Vec3 _ _ z) _ = z

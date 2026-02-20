@@ -5,6 +5,9 @@ import Vec3
 
 type RNG = StdGen
 
+randomInt :: Int -> Int -> RNG -> (Int, RNG)
+randomInt lo hi = uniformR (lo, hi)
+
 randomDouble :: RNG -> (Double, RNG)
 randomDouble = uniformR (0.0, 1.0)
 
