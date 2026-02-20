@@ -48,3 +48,13 @@ randomInUnitDisk g =
     in if vecLengthSquared v < 1
        then (v, g2)
        else randomInUnitDisk g2
+
+randomCosineDirection :: RNG -> (Vec3, RNG)
+randomCosineDirection g0 =
+    let (r1, g1) = randomDouble g0
+        (r2, g2) = randomDouble g1
+        phi = 2 * pi * r1
+        x = cos phi * sqrt r2
+        y = sin phi * sqrt r2
+        z = sqrt (1 - r2)
+    in (Vec3 x y z, g2)
