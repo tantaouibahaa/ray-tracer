@@ -3,26 +3,22 @@ module Material where
 import Vec3
 import Ray
 import Hittable
+import Texture
 import Random
+import PDF
 
-scatter :: Material -> Ray -> HitRecord -> RNG -> Maybe (Vec3, Ray, RNG)
-scatter (Lambertian albedo) _ rec g =
-    let (rv, g') = randomUnitVector g
-        scatterDir0 = hitNormal rec `vecAdd` rv
-        scatterDir = if nearZero scatterDir0 then hitNormal rec else scatterDir0
-        scattered = Ray (hitPoint rec) scatterDir
-    in Just (albedo, scattered, g')
+scatter :: Material -> Ray -> HitRecord -> RNG -> Maybe (ScatterRecord, RNG)
+scatter (Lambertian tex) _ rec g =
+    let attenuation = textureValue tex (hitU rec) (hitV rec) (hitPoint rec)
+    in Just (DiffuseScatter attenuation (mkCosinePdf (hitNormal rec)), g)
 scatter (Metal albedo fuzz) rayIn rec g =
     let reflected = reflect (rayDirection rayIn) (hitNormal rec)
         (rv, g') = randomUnitVector g
         fuzzed = unitVector reflected `vecAdd` vecScale (min fuzz 1.0) rv
-        scattered = Ray (hitPoint rec) fuzzed
-    in if dot fuzzed (hitNormal rec) > 0
-       then Just (albedo, scattered, g')
-       else Nothing
+        specRay = Ray (hitPoint rec) fuzzed (rayTime rayIn)
+    in Just (SpecularScatter albedo specRay, g')
 scatter (Dielectric refIdx) rayIn rec g =
-    let attenuation = Vec3 1 1 1
-        ri = if hitFrontFace rec then 1.0 / refIdx else refIdx
+    let ri = if hitFrontFace rec then 1.0 / refIdx else refIdx
         unitDir = unitVector (rayDirection rayIn)
         cosTheta = min (dot (vecNegate unitDir) (hitNormal rec)) 1.0
         sinTheta = sqrt (1.0 - cosTheta * cosTheta)
@@ -32,8 +28,26 @@ scatter (Dielectric refIdx) rayIn rec g =
         direction = if shouldReflect
                     then reflect unitDir (hitNormal rec)
                     else refract unitDir (hitNormal rec) ri
-        scattered = Ray (hitPoint rec) direction
-    in Just (attenuation, scattered, g')
+        specRay = Ray (hitPoint rec) direction (rayTime rayIn)
+    in Just (SpecularScatter (Vec3 1 1 1) specRay, g')
+scatter (DiffuseLight _) _ _ _ = Nothing
+scatter (Isotropic tex) _ rec g =
+    let attenuation = textureValue tex (hitU rec) (hitV rec) (hitPoint rec)
+    in Just (DiffuseScatter attenuation mkSpherePdf, g)
+
+scatteringPdf :: Material -> Ray -> HitRecord -> Ray -> Double
+scatteringPdf (Lambertian _) _ rec scattered =
+    let cosTheta = dot (hitNormal rec) (unitVector (rayDirection scattered))
+    in max 0 (cosTheta / pi)
+scatteringPdf (Isotropic _) _ _ _ = 1 / (4 * pi)
+scatteringPdf _ _ _ _ = 0
+
+emitted :: Material -> Ray -> HitRecord -> Double -> Double -> Point3 -> Vec3
+emitted (DiffuseLight tex) _ rec u v p =
+    if hitFrontFace rec
+    then textureValue tex u v p
+    else Vec3 0 0 0
+emitted _ _ _ _ _ _ = Vec3 0 0 0
 
 reflectance :: Double -> Double -> Double
 reflectance cosine refIdx =
