@@ -5,8 +5,22 @@ synopsis:      Ray tracer in Haskell
 
 executable ray-tracer-hs
   main-is:       main.hs
-  other-modules: Vec3, Color, Ray, Interval, Hittable, Sphere, Random, Material, Camera
+  other-modules: Vec3, Color, Ray, Interval, Hittable, Sphere, Random, Material, Camera, AABB, Perlin, Texture, Quad, BVH, ONB, PDF
   hs-source-dirs: ., src
-  build-depends: base >= 4.7 && < 5, random
+  build-depends: base >= 4.7 && < 5, random, array, JuicyPixels, vector
   default-language: Haskell2010
   ghc-options: -O2
+
+--
+--   cabal run ray-tracer-hs -- 1 bouncing_spheres.ppm
+--
+--   cabal run ray-tracer-hs -- 2 checkered_spheres.ppm
+--   cabal run ray-tracer-hs -- 3 earth.ppm
+--   cabal run ray-tracer-hs -- 4 perlin_spheres.ppm
+--   cabal run ray-tracer-hs -- 5 quads.ppm
+--   cabal run ray-tracer-hs -- 6 simple_light.ppm
+--   cabal run ray-tracer-hs -- 7 cornell_box.ppm
+--   cabal run ray-tracer-hs -- 8 cornell_smoke.ppm
+--   cabal run ray-tracer-hs -- 9 final_scene.ppm
+--
+--   cabal run ray-tracer-hs -- 10 cornell_box_glass.ppm
